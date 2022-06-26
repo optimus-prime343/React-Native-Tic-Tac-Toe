@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     borderRadius: SIZING.defaultBorderRadius
   },
   boardItemText: {
-    fontSize: 24,
+    fontSize: 56,
     fontWeight: 'bold'
   },
   currentTurn: {
