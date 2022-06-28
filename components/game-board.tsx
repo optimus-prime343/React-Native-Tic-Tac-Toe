@@ -9,6 +9,7 @@ import {
   ViewStyle
 } from 'react-native'
 import React, { useMemo, useState } from 'react'
+import { useToast } from 'react-native-toast-notifications'
 
 import { SIZING } from '../constants/sizing'
 import { COLORS } from '../constants/colors'
@@ -16,8 +17,7 @@ import { PlayerMarker } from '../types/player-marker'
 import { isGameOver } from '../utilities/is-game-over'
 import GameOverModal from './game-over-modal'
 import { Player } from '../types/player'
-
-// !TODO : Add logic for when the game is draw
+import { isGameDraw } from '../utilities/is-game-draw'
 
 interface Props {
   style?: StyleProp<ViewStyle>
@@ -25,10 +25,12 @@ interface Props {
 }
 const boardElements = Array.from({ length: 9 }).map((_, index) => index)
 
+// randomly generates a player marker when the game is first started
 const randomPlayerMarker = () =>
   Math.random() < 0.5 ? PlayerMarker.X : PlayerMarker.O
 
 const GameBoard = ({ style, onGameOver }: Props) => {
+  const toast = useToast()
   const { width } = useWindowDimensions()
   const [marker, setMarker] = useState<PlayerMarker>(() => randomPlayerMarker())
   const [markers, setMarkers] = useState<PlayerMarker[]>([])
@@ -45,6 +47,11 @@ const GameBoard = ({ style, onGameOver }: Props) => {
     setMarkers([])
     setWinner(undefined)
   }
+  const handleGameDraw = () => {
+    toast.show('Game Draw!', { type: 'info' })
+    setMarkers([])
+    setMarker(randomPlayerMarker())
+  }
 
   const handleBoardItemPress = (index: number) => {
     // if the marker at the given index is not empty,do nothing
@@ -57,6 +64,9 @@ const GameBoard = ({ style, onGameOver }: Props) => {
       if (isGameOver(prevMarkers)) {
         setWinner(currentPlayer)
         onGameOver(currentPlayer)
+      }
+      if (isGameDraw(prevMarkers)) {
+        handleGameDraw()
       }
       return prevMarkers
     })
